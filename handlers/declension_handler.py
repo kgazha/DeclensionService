@@ -22,17 +22,20 @@ class DeclensionHandler:
         self.session = sessionmaker(bind=config.ENGINE)()
 
     def get_inflected_text(self, text: str, case: str,
-                           number: str = "sing") -> str:
-        source_text = models.get_or_create(self.session, models.Sentence,
-                                           source_text=text,
-                                           case=case,
-                                           number=number)[0]
-        if source_text.result is not None:
-            return source_text.result
+                           number: str = "sing",
+                           gender: str = "masc") -> str:
         words = text.split()
         inflected_words = []
         for word in words:
-            inflected_words.append(self._get_inflected_word(word, case, number))
+            source_text = models.get_or_create(self.session, models.Sentence,
+                                               source_text=word,
+                                               case=case,
+                                               gender=gender,
+                                               number=number)[0]
+            if source_text.result is not None:
+                inflected_words.append(source_text.result)
+            else:
+                inflected_words.append(self._get_inflected_word(word, case, number, gender=gender))
         target_text = " ".join(inflected_words)
         return apply_cases(text, target_text)
 

@@ -13,6 +13,7 @@ class Sentence(Base):
     source_text = Column(String)
     case = Column(String)
     number = Column(String)
+    gender = Column(String)
     result = Column(String)
     create_datetime = Column(DateTime, default=datetime.now())
 

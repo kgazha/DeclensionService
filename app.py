@@ -15,6 +15,7 @@ parser.add_argument("source_text")
 parser.add_argument("target_text")
 parser.add_argument("case")
 parser.add_argument("number")
+parser.add_argument("gender")
 parser.add_argument("name")
 parser.add_argument("surname")
 parser.add_argument("patronymic")
@@ -27,8 +28,9 @@ class BaseDeclensionService(Resource):
         params = parser.parse_args()
         text = params["source_text"]
         case = params["case"]
+        gender = params["gender"]
         number = params["number"] if params["number"] is not None else "sing"
-        result = text_handler.get_inflected_text(text, case, number)
+        result = text_handler.get_inflected_text(text, case, number, gender)
         return {'result': result}
 
 
@@ -53,9 +55,10 @@ class ExceptionService(Resource):
         source_text = params["source_text"]
         target_text = params["target_text"]
         case = params["case"]
+        gender = params["gender"]
         number = params["number"] if params["number"] is not None else "sing"
         result = exception_handler.save_exception(source_text=source_text, target_text=target_text,
-                                                  case=case, number=number)
+                                                  gender=gender, case=case, number=number)
         return result
 
 

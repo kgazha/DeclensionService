@@ -9,11 +9,13 @@ session = sessionmaker(bind=config.ENGINE)()
 class ExceptionHandler:
     @staticmethod
     def save_exception(source_text: str, target_text: str,
-                       case: str, number: str = "sing") -> str:
+                       case: str, gender: str,
+                       number: str = "sing") -> str:
         try:
             sentence = models.get_or_create(session, models.Sentence,
                                             source_text=source_text,
                                             case=case,
+                                            gender=gender,
                                             number=number)[0]
             sentence.result = target_text
             session.commit()
