@@ -9,14 +9,20 @@ session = sessionmaker(bind=config.ENGINE)()
 class ExceptionHandler:
     @staticmethod
     def save_exception(source_text: str, target_text: str,
-                       case: str, gender: str,
+                       case: str, gender: str = None,
                        number: str = "sing") -> str:
         try:
-            sentence = models.get_or_create(session, models.Sentence,
-                                            source_text=source_text,
-                                            case=case,
-                                            gender=gender,
-                                            number=number)[0]
+            if gender is not None:
+                sentence = models.get_or_create(session, models.Sentence,
+                                                source_text=source_text,
+                                                case=case,
+                                                gender=gender,
+                                                number=number)[0]
+            else:
+                sentence = models.get_or_create(session, models.Sentence,
+                                                source_text=source_text,
+                                                case=case,
+                                                number=number)[0]
             sentence.result = target_text
             session.commit()
         except SQLAlchemyError as error:

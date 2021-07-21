@@ -30,6 +30,14 @@ class DeclensionHandlerTest(unittest.TestCase):
         expected_result = "Иванову Ивану Ивановичу"
         self.assertEqual(expected_result, result)
 
+    def test_male_surname(self):
+        text_handler = DeclensionHandler()
+        source_text = "Хероведов Андрей Михайлович"
+        case = "datv"
+        result = text_handler.get_inflected_person_name(case, fullname=source_text)
+        expected_result = "Хероведову Андрею Михайловичу"
+        self.assertEqual(expected_result, result)
+
     def test_female_case(self):
         text_handler = DeclensionHandler()
         fullname = "Шишь Алёна Алексеевна"

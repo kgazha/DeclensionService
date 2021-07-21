@@ -18,25 +18,26 @@ class DeclensionHandler:
                   творительный: 'ablt', предложный: 'loct')
     number - число (единственное: 'sing', множественное: 'plur')
     """
-    def __init__(self):
-        self.session = sessionmaker(bind=config.ENGINE)()
-
     def get_inflected_text(self, text: str, case: str,
                            number: str = "sing",
-                           gender: str = "masc") -> str:
+                           gender: str = None) -> str:
         words = text.split()
         inflected_words = []
+        session = sessionmaker(bind=config.ENGINE)()
         for word in words:
-            source_text = models.get_or_create(self.session, models.Sentence,
+            source_text = models.get_or_create(session, models.Sentence,
                                                source_text=word,
                                                case=case,
                                                gender=gender,
                                                number=number)[0]
+
             if source_text.result is not None:
                 inflected_words.append(source_text.result)
             else:
                 inflected_words.append(self._get_inflected_word(word, case, number, gender=gender))
         target_text = " ".join(inflected_words)
+        session.commit()
+        session.close()
         return apply_cases(text, target_text)
 
     def get_inflected_person_name(self, case: str, number: str = "sing",
@@ -45,6 +46,13 @@ class DeclensionHandler:
         result_words = []
         _surname, _name, _patronymic = surname, name, patronymic
         if fullname:
+            session = sessionmaker(bind=config.ENGINE)()
+            source_text = models.get_or_create(session, models.Sentence,
+                                               source_text=fullname,
+                                               case=case,
+                                               number=number)[0]
+            if source_text.result is not None:
+                return source_text.result
             _surname, _name, _patronymic = get_separated_name(fullname)
         if _name and _surname:
             gender = self._get_gender_by_name(_name)
@@ -53,13 +61,21 @@ class DeclensionHandler:
             if gender == config.FEMALE and _surname[-1] not in vowels:
                 _surname = _surname.lower()
             else:
-                _surname = self._get_inflected_word(_surname, case, number, gender)
+                _surname = self._get_male_surname(_surname, case, number, gender)
             result_words = [_surname, _name]
             if _patronymic:
                 _patronymic = self._get_inflected_word(_patronymic, case, number)
                 result_words.append(_patronymic)
         result_words = [x.capitalize() for x in result_words]
         return " ".join(result_words)
+
+    def _get_male_surname(self, surname: str, case: str, number: str = None, gender: str = None) -> str:
+        _surname = self._get_inflected_word(surname, case, number, gender)
+        if surname.endswith("ов"):
+            normal_form = morph.parse(surname)[0].normal_form
+            ending = _surname[(len(normal_form)):]
+            _surname = surname + ending
+        return _surname
 
     @staticmethod
     def _get_gender_by_name(name: str) -> str:

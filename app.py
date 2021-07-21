@@ -7,9 +7,6 @@ from handlers.exception_handler import ExceptionHandler
 app = Flask(__name__)
 api = Api(app)
 
-text_handler = DeclensionHandler()
-exception_handler = ExceptionHandler()
-
 parser = reqparse.RequestParser()
 parser.add_argument("source_text")
 parser.add_argument("target_text")
@@ -30,6 +27,7 @@ class BaseDeclensionService(Resource):
         case = params["case"]
         gender = params["gender"]
         number = params["number"] if params["number"] is not None else "sing"
+        text_handler = DeclensionHandler()
         result = text_handler.get_inflected_text(text, case, number, gender)
         return {'result': result}
 
@@ -43,6 +41,7 @@ class PersonNameDeclensionService(Resource):
         surname = params["surname"]
         patronymic = params["patronymic"]
         fullname = params["fullname"]
+        text_handler = DeclensionHandler()
         result = text_handler.get_inflected_person_name(case=case, number=number, name=name,
                                                         surname=surname, patronymic=patronymic,
                                                         fullname=fullname)
@@ -57,6 +56,7 @@ class ExceptionService(Resource):
         case = params["case"]
         gender = params["gender"]
         number = params["number"] if params["number"] is not None else "sing"
+        exception_handler = ExceptionHandler()
         result = exception_handler.save_exception(source_text=source_text, target_text=target_text,
                                                   gender=gender, case=case, number=number)
         return result
