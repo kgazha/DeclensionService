@@ -31,13 +31,13 @@ class DeclensionHandler:
 
         words = text.split()
         inflected_words = []
+        exceptions = session.query(models.Sentence)\
+                            .filter(models.Sentence.source_text.in_(words))
         for word in words:
-            source_word = models.get(session, models.Sentence,
-                                     source_text=word,
-                                     case=case,
-                                     gender=gender,
-                                     number=number)
-
+            source_word = None
+            for x in exceptions:
+                if x.source_text == word:
+                    source_word = x
             if source_word is not None and source_word.result is not None:
                 inflected_words.append(source_word.result)
             else:
