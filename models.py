@@ -30,6 +30,14 @@ def get_or_create(session, model, **kwargs):
         return instance, True
 
 
+def get(session, model, **kwargs):
+    instance = session.query(model).filter_by(**kwargs).first()
+    if instance:
+        return instance
+    else:
+        return None
+
+
 def drop_tables():
     Base.metadata.drop_all(config.ENGINE)
 

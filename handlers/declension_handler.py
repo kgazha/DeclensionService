@@ -21,18 +21,25 @@ class DeclensionHandler:
     def get_inflected_text(self, text: str, case: str,
                            number: str = "sing",
                            gender: str = None) -> str:
+        session = sessionmaker(bind=config.ENGINE)()
+        source_text = models.get(session, models.Sentence,
+                                 source_text=text,
+                                 case=case,
+                                 number=number)
+        if source_text is not None and source_text.result is not None:
+            return source_text.result
+
         words = text.split()
         inflected_words = []
-        session = sessionmaker(bind=config.ENGINE)()
         for word in words:
-            source_text = models.get_or_create(session, models.Sentence,
-                                               source_text=word,
-                                               case=case,
-                                               gender=gender,
-                                               number=number)[0]
+            source_word = models.get(session, models.Sentence,
+                                     source_text=word,
+                                     case=case,
+                                     gender=gender,
+                                     number=number)
 
-            if source_text.result is not None:
-                inflected_words.append(source_text.result)
+            if source_word is not None and source_word.result is not None:
+                inflected_words.append(source_word.result)
             else:
                 inflected_words.append(self._get_inflected_word(word, case, number, gender=gender))
         target_text = " ".join(inflected_words)
@@ -47,11 +54,11 @@ class DeclensionHandler:
         _surname, _name, _patronymic = surname, name, patronymic
         if fullname:
             session = sessionmaker(bind=config.ENGINE)()
-            source_text = models.get_or_create(session, models.Sentence,
-                                               source_text=fullname,
-                                               case=case,
-                                               number=number)[0]
-            if source_text.result is not None:
+            source_text = models.get(session, models.Sentence,
+                                     source_text=fullname,
+                                     case=case,
+                                     number=number)
+            if source_text is not None and source_text.result is not None:
                 return source_text.result
             _surname, _name, _patronymic = get_separated_name(fullname)
         if _name and _surname:
