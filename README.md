@@ -1,4 +1,3 @@
-# DeclensionService
 # Сервис склонения #
 ### localhost/person_name ###
 Обязательные поля POST запроса: **fullname, case**
